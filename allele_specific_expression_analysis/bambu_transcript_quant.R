@@ -2,7 +2,7 @@ library(bambu)
 library(doParallel)
 library(foreach)
 library(dplyr)
- 
+  
 
 fa <- 'v3.9.fasta'
 # using CDS here to avoid overlapping exon features from spurious gene annotation.
