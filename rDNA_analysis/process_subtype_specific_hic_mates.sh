@@ -11,7 +11,7 @@ source /opt/conda/etc/profile.d/conda.sh
 conda activate /home/groups/schwessinger/condaEnvs/common-tools
 
 # index genome
-bwa-mem2 index -p $genome_fasta $genome_fasta
+#bwa-mem2 index -p $genome_fasta $genome_fasta
 # index kmer
 awk '{ if ($0 ~ /^>/) { if (NR > 1) printf("\n"); printf("%s\t", substr($0, 2)); } else printf("%s", $0) } END { printf("\n") }' $kmer_fasta > $kmer_fasta.idx
 
@@ -51,4 +51,4 @@ export -f process_kmer
 
 # generate cmds and parallelise
 awk -v subtype=$subtype -v genome=$genome_fasta -v r1=$r1 -v r2=$r2 \
-    '{ print $1, $2, subtype, genome, r1, r2 }' $kmer_fasta.idx | parallel -j 16 --colsep ' ' process_kmer
+    '{ print $1, $2, subtype, genome, r1, r2 }' $kmer_fasta.idx | parallel -j $cpus --colsep ' ' process_kmer
