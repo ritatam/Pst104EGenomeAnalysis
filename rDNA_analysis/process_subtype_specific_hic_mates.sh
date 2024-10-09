@@ -12,8 +12,16 @@ conda activate /home/groups/schwessinger/condaEnvs/common-tools
 
 # index genome
 #bwa-mem2 index -p $genome_fasta $genome_fasta
+
+mkdir -p $subtype
+rcadded_fasta=$subtype/${kmer_fasta%.fasta}.RCadded.fasta
+
+# since we are using k-mers to sample Hi-C sequencing reads, need to consider reverse complement of k-mers as well
+cp $kmer_fasta $rcadded_fasta
+seqkit seq --seq-type DNA -r -p $kmer_fasta | sed 's/^>\(.*\)/>\1rc/' >>  $rcadded_fasta
+
 # index kmer
-awk '{ if ($0 ~ /^>/) { if (NR > 1) printf("\n"); printf("%s\t", substr($0, 2)); } else printf("%s", $0) } END { printf("\n") }' $kmer_fasta > $kmer_fasta.idx
+awk '{ if ($0 ~ /^>/) { if (NR > 1) printf("\n"); printf("%s\t", substr($0, 2)); } else printf("%s", $0) } END { printf("\n") }' $rcadded_fasta > $rcadded_fasta.idx
 
 process_kmer() {
     kmer_id=$1
@@ -23,8 +31,8 @@ process_kmer() {
     r1=$5
     r2=$6
 
-    mkdir -p $subtype
-    outdir=$subtype/kmer_${kmer_id}
+    mkdir -p ${subtype}/kmers
+    outdir=${subtype}/kmers/kmer_${kmer_id}
     mkdir -p $outdir
     r1_out=kmer_${kmer_id}.R1
     r2_out=kmer_${kmer_id}.R2
@@ -33,8 +41,8 @@ process_kmer() {
     grep $kmer $r1 > ${outdir}/${r1_out}.fastq -B1 -A2
     grep $kmer $r2 > ${outdir}/${r2_out}.fastq -B1 -A2
     # grep and format identifiers of extracted reads associated with the kmer
-    grep '^@' ${outdir}/${r1_out}.fastq | cut -d ' ' -f1 | sed 's/^@//' > ${outdir}/kmer_${kmer_id}.R1.readID.txt
-    grep '^@' ${outdir}/${r2_out}.fastq | cut -d ' ' -f1 | sed 's/^@//' > ${outdir}/kmer_${kmer_id}.R2.readID.txt
+    grep '^@' ${outdir}/${r1_out}.fastq | cut -d ' ' -f1 | sed 's/^@//' | sort | uniq > ${outdir}/kmer_${kmer_id}.R1.readID.txt
+    grep '^@' ${outdir}/${r2_out}.fastq | cut -d ' ' -f1 | sed 's/^@//' | sort | uniq >  ${outdir}/kmer_${kmer_id}.R2.readID.txt
     # extract mates
     seqtk subseq $r2 ${outdir}/kmer_${kmer_id}.R1.readID.txt > ${outdir}/${r2_out}.mates.fastq
     seqtk subseq $r1 ${outdir}/kmer_${kmer_id}.R2.readID.txt > ${outdir}/${r1_out}.mates.fastq
@@ -43,12 +51,16 @@ process_kmer() {
     bwa-mem2 mem -t 16 $genome_fasta ${outdir}/${r1_out}.mates.fastq | samtools sort -@ 4 -o ${outdir}/kmer_${kmer_id}.R1.mates.bam
     # convert bam to bed for mapping locations and MAPQ score
     # remove duplicated records as some reads might be tagged by consecutive k-mers multiple times
-    bedtools bamtobed -i ${outdir}/kmer_${kmer_id}.R2.mates.bam | sort -k4,4 | uniq > ${outdir}/kmer_${kmer_id}.R2.mates.bed
-    bedtools bamtobed -i ${outdir}/kmer_${kmer_id}.R1.mates.bam | sort -k4,4 | uniq > ${outdir}/kmer_${kmer_id}.R1.mates.bed
+    bedtools bamtobed -i ${outdir}/kmer_${kmer_id}.R2.mates.bam | sort -k4,4 > ${outdir}/kmer_${kmer_id}.R2.mates.bed
+    bedtools bamtobed -i ${outdir}/kmer_${kmer_id}.R1.mates.bam | sort -k4,4 > ${outdir}/kmer_${kmer_id}.R1.mates.bed
+    # clean up intermediate files
+    rm ${outdir}/${r1_out}.fastq ${outdir}/${r2_out}.fastq ${outdir}/kmer_${kmer_id}.R1.readID.txt ${outdir}/kmer_${kmer_id}.R2.readID.txt ${outdir}/${r2_out}.mates.fastq ${outdir}/${r1_out}.mates.fastq ${outdir}/kmer_${kmer_id}.R2.mates.bam ${outdir}/kmer_${kmer_id}.R1.mates.bam
 }
 
 export -f process_kmer
 
 # generate cmds and parallelise
 awk -v subtype=$subtype -v genome=$genome_fasta -v r1=$r1 -v r2=$r2 \
-    '{ print $1, $2, subtype, genome, r1, r2 }' $kmer_fasta.idx | parallel -j $cpus --colsep ' ' process_kmer
+    '{ print $1, $2, subtype, genome, r1, r2 }' $rcadded_fasta.idx | parallel -j $cpus --colsep ' ' process_kmer
+
+cat ${subtype}/kmers/kmer_*/*mates.bed | sort -k4,4 | uniq > ${subtype}/rDNA_${subtype}.bwamem2.kmer.hic-mates.bed
