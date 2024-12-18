@@ -1,7 +1,7 @@
 # 1. prepare reference
 mkdir references
 cp assembly.v3.9.fasta references/
-bwa index assembly.v.2.2.fasta
+bwa index assembly.v3.9.fasta
 
 # 2. prepare fastq
 mkdir fastq
