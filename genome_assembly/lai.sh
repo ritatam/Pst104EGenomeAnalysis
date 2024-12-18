@@ -11,11 +11,11 @@ for hap in {hapA,hapB}
 do
 	genome=/media/ssd/rita/project/104e/LAI/v3.9.${hap}.fasta
 
-	#$gt suffixerator -db $genome -indexname $genome -tis -suf -lcp -des -ssp -sds -dna
+	$gt suffixerator -db $genome -indexname $genome -tis -suf -lcp -des -ssp -sds -dna
 
-	#$gt ltrharvest -index $genome -minlenltr 100 -maxlenltr 7000 -mintsd 4 -maxtsd 6 -motif TGCA -motifmis 1 -similar 85 -vic 10 -seed 20 -seqids yes > ${genome}.harvest.scn
+	$gt ltrharvest -index $genome -minlenltr 100 -maxlenltr 7000 -mintsd 4 -maxtsd 6 -motif TGCA -motifmis 1 -similar 85 -vic 10 -seed 20 -seqids yes > ${genome}.harvest.scn
 
-	#$ltr_finder_parallel -seq $genome -threads 10 -harvest_out -size 1000000 -time 300
+	$ltr_finder_parallel -seq $genome -threads 10 -harvest_out -size 1000000 -time 300
 	
 	cat $genome.harvest.scn $genome.finder.combine.scn > $genome.rawLTR.scn
         
