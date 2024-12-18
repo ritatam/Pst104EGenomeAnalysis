@@ -11,19 +11,12 @@ simplex=${workdir}/ont/Pst104E_simplex.q10.l100k.htcrop100.fastq.gz
 unphased_out=${workdir}/unphased_asm
 ################
 
-echo Duplex is $duplex
-echo Simplex is $simplex
-
 # run verkko
 conda activate /home/groups/schwessinger/condaEnvs/verkko ;
-mkdir -p ${unphased_out} ;
-verkko -d ${unphased_out} --hifi ${duplex} --nano ${simplex} --threads 16 --local-memory 56 --mbg /media/ssd/rita/softwares/MBG/bin/MBG ;
+mkdir -p ${unphased_out}
+verkko -d ${unphased_out} --hifi ${duplex} --nano ${simplex} --threads 16 --local-memory 56 --mbg /media/ssd/rita/softwares/MBG/bin/MBG
 
 # run verkkohic
-
-conda deactivate
-conda activate /home/groups/schwessinger/condaEnvs/verkko_tmp
-
 mkdir -p ${gfase_out}
 cd ${workdir}
 gfase_wrapper=/media/ssd/rita/softwares/verkkohic/gfase_wrapper.sh
