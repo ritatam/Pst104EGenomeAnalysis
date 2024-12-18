@@ -13,7 +13,7 @@ cut -f1 mtDNA.blast | sort | uniq > mtDNA_contigs.txt
 wc -l mtDNA_contigs.txt
 ```
 
-**I strong recommend users to examine qcov and alignment length against your target species/genus mtDNA records in nt database (eg Pucciniales), to double check if there's false positive. For example a mtDNA hit with very short qcov could indicate shared sequences between gDNA and mtDNA e.g. cytochrome b gene.**
+**I strong recommend users to examine qcov and alignment length against your target species mtDNA records in nt database (eg Pucciniales), to double check if there's false positive. For example a mtDNA hit with very short qcov might indicate shared sequences between nuclear DNA and mtDNA (this can happen if mtDNA fragments have migrated into nucleus). In this case one may want to map the reads back to the genome assembly and check presence of erroeous alignments and abnormal coverage**
 
 Once inspected and confirmed, save mtDNA contigs in mtDNA.fasta to keep record. 
 ```
@@ -30,7 +30,7 @@ filterbyname.sh in=gfase_asm/assembly.fasta out=assembly.mtDNArm.fasta names=mtD
 check all species names 
 `cut -f12 all.blast | sort | uniq | less`
 
-Printed:
+In my case, it printed:
 ```
 Austropuccinia psidii
 Puccinia aucta
