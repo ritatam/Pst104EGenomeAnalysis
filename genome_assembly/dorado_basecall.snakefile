@@ -1,5 +1,6 @@
 # snakemake pipeline for duplex basecalling with dorado on National Computational Infrastructure, ANU, Australia.
-# see https://github.com/ritatam/dorado-snake-nci/tree/main.
+# this uses dorado v0.2.1, which had not integrated duplex pairing and read splitting at the time.
+# see https://github.com/ritatam/dorado-snake-nci/tree/main
 
 configfile: "config.yaml"
 
