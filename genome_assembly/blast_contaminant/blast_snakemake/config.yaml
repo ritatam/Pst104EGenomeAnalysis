@@ -1,0 +1,13 @@
+# input directory containing all query fasta. read fastq must be converted to fasta format.
+input_dir: "/media/ssd/common/blast/blastsnake/test/input"
+
+# output directory for storing blast report files (*.blast).
+# will be created if it doesn't exist
+output_blast_dir: "/media/ssd/common/blast/blastsnake/test/blast_out"
+
+### BLAST SETTINGS ###
+blast_db: "/media/ssd/common/blast/db/nt/nt"
+blast_outfmt: "6 qseqid sseqid stitle length qcov pident qstart qend sstart send sscinames staxids evalue"
+perc_identity: "75"
+max_target_seqs: "10"
+evalue: "1e-5"

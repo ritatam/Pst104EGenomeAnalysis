@@ -1,0 +1,30 @@
+import os
+from glob import glob
+
+configfile: "config.yaml"
+
+INDIR = config["input_dir"]
+OUTDIR = config["output_blast_dir"] 
+FILES = [os.path.splitext(n)[0] for n in os.listdir(INDIR)]
+BLAST_DB = config["blast_db"]
+OUTFMT = config["blast_outfmt"]
+
+rule all:
+    input:
+        expand(f"{OUTDIR}/{{file}}.blast", file=FILES)
+
+
+rule blast:
+    input:
+        f"{INDIR}/{{file}}.fasta"
+    params:
+        db = BLAST_DB,
+        outfmt = OUTFMT,
+        exportdb = os.path.split(BLAST_DB)[0]
+    output:
+        f"{OUTDIR}/{{file}}.blast"
+    conda:
+        "blast.yaml"
+    shell:
+        "set +u; export BLASTDB=$BLASTDB:{params.exportdb}; set -u; "
+        "blastn -db {params.db} -perc_identity {config[perc_identity]} -query {input} -out {output} -outfmt '{params.outfmt}' -max_target_seqs {config[max_target_seqs]} -evalue {config[evalue]}"
