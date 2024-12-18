@@ -1,3 +1,3 @@
 # Pst104EGenomeBiology
 
-codes for "Dikaryotic organisation and regulation of wheat stripe rust fungus reevaled by a telomere-to-telomere nuclear-phased genome assembly"
+codes for "Long-read genomics reveal extensive nuclear-specific evolution and allele-specific expression in a dikaryotic fungus"
